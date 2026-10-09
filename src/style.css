@@ -68,6 +68,8 @@ select:focus { border-color: var(--mint); }
 .arena-message.visible { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 .pause-overlay { position: absolute; inset: 0; display: grid; place-content: center; gap: 12px; text-align: center; background: rgba(4, 14, 22, .76); backdrop-filter: blur(5px); }
 .pause-overlay.hidden { display: none; }.pause-overlay span { color: var(--lime); font: 500 32px 'DM Mono', monospace; letter-spacing: .16em; }.pause-overlay small { color: var(--muted); }
+.pause-home-button { border: 1px solid rgba(215, 255, 116, .45); background: rgba(7, 17, 27, .7); color: var(--lime); padding: 11px 18px; font-size: 12px; letter-spacing: .08em; }
+.pause-home-button:hover { background: var(--lime); color: var(--ink); }
 .typing-console { flex: 0 0 auto; width: min(900px, 100%); margin: 15px auto 0; padding: 0 4px 2px; }
 .target-meta, .typing-footer { display: flex; justify-content: space-between; color: var(--muted); font: 11px 'DM Mono', monospace; letter-spacing: .04em; }
 .target-text { margin: 11px 0 13px; font-size: clamp(19px, 3vw, 30px); font-weight: 700; line-height: 1.45; letter-spacing: .08em; }

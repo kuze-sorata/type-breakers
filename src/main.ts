@@ -126,7 +126,11 @@ class GameView {
           <div class="arena-corner top-left">${this.session.options.mode === 'story' ? 'STORY RUN' : 'ENDLESS RUN'}</div>
           <div class="arena-corner top-right" id="wave-label">WAVE 01 / 09</div>
           <div class="arena-message" id="arena-message"></div>
-          <div class="pause-overlay hidden" id="pause-overlay"><span>PAUSED</span><small>Escで再開</small></div>
+          <div class="pause-overlay hidden" id="pause-overlay">
+            <span>PAUSED</span>
+            <small>Escで再開</small>
+            <button class="pause-home-button" id="pause-home-button">タイトルへ戻る</button>
+          </div>
         </section>
         <section class="typing-console">
           <div class="target-meta"><span id="enemy-caption">接近中の敵</span><span id="distance-label">距離 100%</span></div>
@@ -141,6 +145,7 @@ class GameView {
     window.addEventListener('keydown', this.onKeyDown);
     window.addEventListener('resize', this.onResize);
     document.querySelector<HTMLButtonElement>('#pause-button')?.addEventListener('click', () => this.togglePause());
+    document.querySelector<HTMLButtonElement>('#pause-home-button')?.addEventListener('click', () => this.returnToTitle());
     this.resizeCanvas();
     this.updateHud();
     this.animation = requestAnimationFrame((time) => this.loop(time));
@@ -205,6 +210,13 @@ class GameView {
     document.querySelector('#pause-overlay')?.classList.toggle('hidden', !this.session.paused);
     const button = document.querySelector<HTMLButtonElement>('#pause-button');
     if (button) button.textContent = this.session.paused ? '再開' : '一時停止';
+  }
+
+  private returnToTitle(): void {
+    cancelAnimationFrame(this.animation);
+    window.removeEventListener('keydown', this.onKeyDown);
+    window.removeEventListener('resize', this.onResize);
+    titleScreen();
   }
 
   private updateEffects(delta: number): void {
