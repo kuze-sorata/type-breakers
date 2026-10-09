@@ -40,9 +40,10 @@ describe('TypingEngine', () => {
 });
 
 describe('prompt data', () => {
-  it('contains at least 150 prompts across three difficulty bands', () => {
-    expect(PROMPTS.length).toBeGreaterThanOrEqual(150);
+  it('contains the original prompts plus about 1000 generated prompts', () => {
+    expect(PROMPTS.length).toBeGreaterThanOrEqual(1150);
     expect(new Set(PROMPTS.map((prompt) => prompt.id)).size).toBe(PROMPTS.length);
+    expect(new Set(PROMPTS.map((prompt) => prompt.text)).size).toBe(PROMPTS.length);
   });
 
   it('keeps final punctuation out of the typing target', () => {

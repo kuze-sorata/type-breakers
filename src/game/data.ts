@@ -84,6 +84,76 @@ const longSeeds: SeedPrompt[] = [
   ['旅で出会った人々の言葉を胸に刻んで帰る', 'たびでであったひとびとのことばをむねにきざんでかえる', '旅'],
 ];
 
+type Phrase = [text: string, reading: string];
+
+// LLMで設計した文型と語彙。組み合わせはすべて入力用の読みも同時に持ち、
+// 実行時に重複を除いて追加問題を生成する。
+const generatedEasyTimes: Phrase[] = [
+  ['朝に', 'あさに'], ['昼に', 'ひるに'], ['夕方に', 'ゆうがたに'], ['夜に', 'よるに'],
+  ['春の朝に', 'はるのあさに'], ['夏の朝に', 'なつのあさに'], ['秋の夕方に', 'あきのゆうがたに'], ['冬の朝に', 'ふゆのあさに'],
+  ['晴れた日に', 'はれたひに'], ['雨の日に', 'あめのひに'], ['静かな朝に', 'しずかなあさに'], ['星の夜に', 'ほしのよるに'],
+  ['旅の途中で', 'たびのとちゅうで'], ['帰り道で', 'かえりみちで'], ['休みの日に', 'やすみのひに'], ['森の入口で', 'もりのいりぐちで'],
+  ['小さな町で', 'ちいさなまちで'], ['海辺で', 'うみべで'], ['丘の上で', 'おかのうえで'], ['窓辺で', 'まどべで'],
+];
+
+const generatedEasyActions: Phrase[] = [
+  ['空を見上げる', 'そらをみあげる'], ['水を一杯飲む', 'みずをいっぱいのむ'], ['ゆっくり歩く', 'ゆっくりあるく'],
+  ['本を読む', 'ほんをよむ'], ['音楽を聴く', 'おんがくをきく'], ['深呼吸をする', 'しんこきゅうをする'],
+  ['花に水をあげる', 'はなにみずをあげる'], ['窓を開ける', 'まどをあける'], ['笑顔であいさつする', 'えがおであいさつする'],
+  ['小さく手を振る', 'ちいさくてをふる'], ['荷物を整える', 'にもつをととのえる'], ['靴ひもを結ぶ', 'くつひもをむすぶ'],
+  ['道を確かめる', 'みちをたしかめる'], ['灯りをともす', 'あかりをともす'], ['仲間を待つ', 'なかまをまつ'],
+];
+
+const generatedMediumPlaces: Phrase[] = [
+  ['古い図書館で', 'ふるいとしょかんで'], ['朝の市場で', 'あさのいちばで'], ['静かな湖畔で', 'しずかなこはんで'],
+  ['緑の草原で', 'みどりのそうげんで'], ['深い森の中で', 'ふかいもりのなかで'], ['城門の前で', 'じょうもんのまえで'],
+  ['小さな港町で', 'ちいさなみなとまちで'], ['山道の途中で', 'やまみちのとちゅうで'], ['雨上がりの庭で', 'あめあがりのにわで'],
+  ['星明かりの下で', 'ほしあかりのしたで'], ['旅人の宿で', 'たびびとのやどで'], ['地下の広間で', 'ちかのひろまで'],
+  ['風の強い丘で', 'かぜのつよいおかで'], ['雪の積もる村で', 'ゆきのつもるむらで'],
+];
+
+const generatedMediumActions: Phrase[] = [
+  ['新しい地図を調べる', 'あたらしいちずをしらべる'], ['焼きたてのパンを買う', 'やきたてのぱんをかう'],
+  ['水面の揺れを眺める', 'みなものゆれをながめる'], ['仲間と昼食を食べる', 'なかまとちゅうしょくをたべる'],
+  ['鳥の声に耳を澄ます', 'とりのこえにみみをすます'], ['城へ続く道を確認する', 'しろへつづくみちをかくにんする'],
+  ['船の出発時刻を確かめる', 'ふねのしゅっぱつじこくをたしかめる'], ['明日の天気を予想する', 'あしたのてんきをよそうする'],
+  ['ぬれた荷物を乾かす', 'ぬれたにもつをかわかす'], ['旅の記録を書き残す', 'たびのきろくをかきのこす'],
+  ['温かいスープを分け合う', 'あたたかいすーぷをわけあう'], ['古い扉の仕掛けを探す', 'ふるいとびらのしかけをさがす'],
+  ['風向きを見て旗を立てる', 'かざむきをみてはたをたてる'], ['村の人に道を尋ねる', 'むらのひとにみちをたずねる'],
+  ['忘れ物がないか確認する', 'わすれものがないかかくにんする'], ['仲間の装備を点検する', 'なかまのそうびをてんけんする'],
+  ['遠くの灯りを目印にする', 'とおくのあかりをめじるしにする'], ['小さな橋を慎重に渡る', 'ちいさなはしをしんちょうにわたる'],
+  ['なくした鍵の場所を考える', 'なくしたかぎのばしょをかんがえる'], ['朝まで交代で見張る', 'あさまでこうたいでみはる'],
+  ['古い歌を静かに口ずさむ', 'ふるいうたをしずかにくちずさむ'], ['夕暮れの景色を絵に描く', 'ゆうぐれのけしきをえにかく'],
+  ['山の高さを地図で測る', 'やまのたかさをちずではかる'], ['町の明かりを遠くから眺める', 'まちのあかりをとおくからながめる'],
+  ['次の目的地を話し合う', 'つぎのもくてきをはなしあう'],
+];
+
+const generatedHardStarts: Phrase[] = [
+  ['古代の石碑を読み解くために', 'こだいのせきひをよみとくために'], ['夜の砂漠を越える前に', 'よるのさばくをこえるまえに'],
+  ['城の門が開くまで', 'しろのもんがひらくまで'], ['失われた鐘を探して', 'うしなわれたかねをさがして'],
+  ['仲間の声を聞きながら', 'なかまのこえをききながら'], ['雲の切れ間から光が差したので', 'くものきれまからひかりがさしたので'],
+  ['最後の鍵を見つけたあと', 'さいごのかぎをみつけたあと'], ['魔王の気配を感じても', 'まおうのけはいをかんじても'],
+  ['旅の記録を読み返しながら', 'たびのきろくをよみかえしながら'], ['冷たい雨が降り始めたけれど', 'つめたいあめがふりはじめたけれど'],
+  ['朝の鐘が鳴ったあと', 'あさのかねがなったあと'], ['大切な約束を胸に抱いて', 'たいせつなやくそくをむねにだいて'],
+  ['星の位置を確かめながら', 'ほしのいちをたしかめながら'], ['小さな勇気を思い出せば', 'ちいさなゆうきをおもいだせば'],
+];
+
+const generatedHardEnds: Phrase[] = [
+  ['仲間と手がかりを集める', 'なかまとてがかりをあつめる'], ['水と地図を確かめる', 'みずとちずをたしかめる'],
+  ['静かに作戦を立てる', 'しずかにさくせんをたてる'], ['森の奥へ歩いていく', 'もりのおくへあるいていく'],
+  ['険しい山道を登り続ける', 'けわしいやまみちをのぼりつづける'], ['全員が空を見上げる', 'ぜんいんがそらをみあげる'],
+  ['古い扉をゆっくり開ける', 'ふるいとびらをゆっくりあける'], ['誰も後ろを振り返らずに進む', 'だれもうしろをふりかえらずにすすむ'],
+  ['次の目的地を決める', 'つぎのもくてきをきめる'], ['仲間は火を守り続ける', 'なかまはひをまもりつづける'],
+  ['村の人々が広場に集まる', 'むらのひとびとがひろばにあつまる'], ['遠い城を目指して歩く', 'とおいしろをめざしてあるく'],
+  ['暗い洞窟の出口を探す', 'くらいどうくつのでぐちをさがす'], ['新しい道を選ぶことができる', 'あたらしいみちをえらぶことができる'],
+  ['失われた鐘の音を探し続ける', 'うしなわれたかねのおとをさがしつづける'], ['全員で力を合わせて扉を押す', 'ぜんいんでちからをあわせてとびらをおす'],
+  ['小さな灯りを仲間へ届ける', 'ちいさなあかりをなかまへとどける'], ['遠くの山影を目印に進む', 'とおくのやまかげをめじるしにすすむ'],
+  ['古い伝説の続きを読み解く', 'ふるいでんせつのつづきをよみとく'], ['傷ついた旅人に水を渡す', 'きずついたたびびとにみずをわたす'],
+  ['王国の未来を静かに思い描く', 'おうこくのみらいをしずかにおもいえがく'], ['最後の呪文を正しく唱える', 'さいごのじゅもんをただしくとなえる'],
+  ['仲間の帰りを灯りをともして待つ', 'なかまのかえりをあかりをともしてまつ'], ['見つけた宝を村へ持ち帰る', 'みつけたたからをむらへもちかえる'],
+  ['新しい朝まで歩みを止めない', 'あたらしいあさまであゆみをとめない'],
+];
+
 function makePrompts(seeds: SeedPrompt[], difficulty: Difficulty, offset: number): Prompt[] {
   return seeds.map(([text, reading, category], index) => ({
     id: `${difficulty}-${offset + index + 1}`,
@@ -102,10 +172,52 @@ function stripFinalPunctuation(value: string): string {
   return value.replace(/[。．.!！?？]+$/u, '');
 }
 
+function createGeneratedPrompts(): Prompt[] {
+  const prompts: Prompt[] = [];
+  const seen = new Set<string>();
+  let serial = 1;
+  const add = (text: string, reading: string, difficulty: Difficulty, category: string): void => {
+    const cleanText = stripFinalPunctuation(text);
+    const cleanReading = stripFinalPunctuation(reading);
+    if (seen.has(cleanText)) return;
+    seen.add(cleanText);
+    prompts.push({ id: `generated-${String(serial).padStart(4, '0')}`, text: cleanText, reading: cleanReading, difficulty, category });
+    serial += 1;
+  };
+
+  for (let timeIndex = 0; timeIndex < generatedEasyTimes.length; timeIndex += 1) {
+    for (let actionIndex = 0; actionIndex < generatedEasyActions.length; actionIndex += 1) {
+      const [timeText, timeReading] = generatedEasyTimes[timeIndex];
+      const [actionText, actionReading] = generatedEasyActions[actionIndex];
+      add(`${timeText}${actionText}`, `${timeReading}${actionReading}`, 'easy', ['日常', '自然', '冒険', '学び'][actionIndex % 4]);
+    }
+  }
+
+  for (let placeIndex = 0; placeIndex < generatedMediumPlaces.length; placeIndex += 1) {
+    for (let actionIndex = 0; actionIndex < generatedMediumActions.length; actionIndex += 1) {
+      const [placeText, placeReading] = generatedMediumPlaces[placeIndex];
+      const [actionText, actionReading] = generatedMediumActions[actionIndex];
+      add(`${placeText}${actionText}`, `${placeReading}${actionReading}`, 'normal', ['冒険', '日常', '自然', '学び'][placeIndex % 4]);
+    }
+  }
+
+  for (let startIndex = 0; startIndex < generatedHardStarts.length; startIndex += 1) {
+    for (let endIndex = 0; endIndex < generatedHardEnds.length; endIndex += 1) {
+      const [startText, startReading] = generatedHardStarts[startIndex];
+      const [endText, endReading] = generatedHardEnds[endIndex];
+      add(`${startText}${endText}`, `${startReading}${endReading}`, 'hard', ['物語', '旅', '決戦', '教訓'][startIndex % 4]);
+    }
+  }
+  return prompts;
+}
+
+const generatedPrompts = createGeneratedPrompts();
+
 export const PROMPTS: Prompt[] = [
   ...makePrompts([...shortSeeds, ...withVariants(shortSeeds)], 'easy', 0),
   ...makePrompts([...mediumSeeds, ...withVariants(mediumSeeds)], 'normal', 50),
   ...makePrompts([...longSeeds, ...withVariants(longSeeds)], 'hard', 100),
+  ...generatedPrompts,
 ];
 
 export const STAGES = [
