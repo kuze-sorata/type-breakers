@@ -40,14 +40,23 @@ describe('TypingEngine', () => {
 });
 
 describe('prompt data', () => {
-  it('contains the original prompts plus about 1000 generated prompts', () => {
-    expect(PROMPTS.length).toBeGreaterThanOrEqual(1150);
+  it('contains many unique prompts across multiple sentence families', () => {
+    expect(PROMPTS.length).toBeGreaterThanOrEqual(170);
     expect(new Set(PROMPTS.map((prompt) => prompt.id)).size).toBe(PROMPTS.length);
     expect(new Set(PROMPTS.map((prompt) => prompt.text)).size).toBe(PROMPTS.length);
+    expect(new Set(PROMPTS.map((prompt) => prompt.family)).size).toBeGreaterThanOrEqual(9);
+    expect(PROMPTS.every((prompt) => !prompt.id.startsWith('generated-'))).toBe(true);
   });
 
   it('keeps final punctuation out of the typing target', () => {
     expect(PROMPTS.every((prompt) => !/[。．.!！?？]$/u.test(prompt.text))).toBe(true);
     expect(PROMPTS.every((prompt) => !/[。．.!！?？]$/u.test(prompt.reading))).toBe(true);
+  });
+
+  it('gives every independent prompt a valid romaji route', () => {
+    for (const prompt of PROMPTS) {
+      const engine = new TypingEngine(prompt.reading);
+      expect(typeAll(engine, engine.candidates[0]).at(-1)).toBe('complete');
+    }
   });
 });

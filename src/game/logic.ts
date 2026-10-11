@@ -45,6 +45,7 @@ export class GameSession {
   enemy: Enemy;
   private deck: Prompt[] = [];
   private used = new Set<string>();
+  private lastFamily?: string;
 
   constructor(options: SessionOptions) {
     this.options = options;
@@ -135,17 +136,29 @@ export class GameSession {
   }
 
   private nextPrompt(): Prompt {
-    if (this.deck.length === 0) this.deck = [...promptsForDifficulty(this.options.difficulty)].sort(() => Math.random() - 0.5);
-    let prompt = this.deck.pop();
-    while (prompt && this.used.has(prompt.id) && this.deck.length > 0) prompt = this.deck.pop();
-    if (!prompt) {
+    if (this.deck.length === 0) {
       this.used.clear();
-      this.deck = [...promptsForDifficulty(this.options.difficulty)].sort(() => Math.random() - 0.5);
-      prompt = this.deck.pop();
+      this.deck = this.shuffle(promptsForDifficulty(this.options.difficulty));
     }
+
+    const differentFamilyIndex = this.deck.findIndex((prompt) => !this.used.has(prompt.id) && prompt.family !== this.lastFamily);
+    const availableIndex = differentFamilyIndex >= 0
+      ? differentFamilyIndex
+      : this.deck.findIndex((prompt) => !this.used.has(prompt.id));
+    const [prompt] = availableIndex >= 0 ? this.deck.splice(availableIndex, 1) : [];
     if (!prompt) throw new Error('問題データがありません');
     this.used.add(prompt.id);
+    this.lastFamily = prompt.family;
     return prompt;
+  }
+
+  private shuffle(prompts: Prompt[]): Prompt[] {
+    const shuffled = [...prompts];
+    for (let index = shuffled.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+    }
+    return shuffled;
   }
 
   private spawnEnemy(): Enemy {
