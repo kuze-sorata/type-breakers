@@ -225,11 +225,11 @@ export const PROMPTS: Prompt[] = [
 ];
 
 export const STAGES = [
-  { name: '風渡る草原', theme: 'grassland', enemy: 'モスリィ', tint: '#9bd86f' },
-  { name: 'ささやきの森', theme: 'forest', enemy: 'ウッドル', tint: '#52c799' },
-  { name: '星降る洞窟', theme: 'cave', enemy: 'クリスタ', tint: '#76b9ff' },
-  { name: '紅蓮の城', theme: 'castle', enemy: 'グリム', tint: '#ff8a6b' },
-  { name: '魔王の間', theme: 'throne', enemy: 'ヴァルガ', tint: '#db72ff' },
+  { name: '魔城の外壁', theme: 'grassland', enemy: 'モスリィ', tint: '#d28a55' },
+  { name: '血染めの回廊', theme: 'forest', enemy: 'ウッドル', tint: '#bb5a55' },
+  { name: '黒曜の地下聖堂', theme: 'cave', enemy: 'クリスタ', tint: '#bd6680' },
+  { name: '紅蓮の城門', theme: 'castle', enemy: 'グリム', tint: '#ef7543' },
+  { name: '魔王の間', theme: 'throne', enemy: 'ヴァルガ', tint: '#e1a04f' },
 ] as const;
 
 export const DIFFICULTY_LABELS: Record<Difficulty, string> = {
