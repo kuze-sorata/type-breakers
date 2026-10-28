@@ -11,6 +11,14 @@ type Projectile = { progress: number; wobble: number; hue: number; target: Point
 type Particle = { x: number; y: number; vx: number; vy: number; life: number; maxLife: number; size: number; hue: number };
 type Slash = { life: number; maxLife: number; angle: number; size: number; hue: number; x: number; y: number };
 
+function enemyApproachScale(distance: number): number {
+  return (0.24 + distance * 0.82) * (1 + distance ** 3 * 2);
+}
+
+function enemyCenterY(height: number, distance: number): number {
+  return height * (0.34 + distance * 0.08 + distance ** 2 * 0.17);
+}
+
 const enemySprites = {
   beast: new Image(),
   boss: new Image(),
@@ -551,10 +559,10 @@ class GameView {
   private drawEnemy(ctx: CanvasRenderingContext2D, width: number, height: number, seconds: number): void {
     const enemy = this.session.enemy;
     const distance = enemy.distance;
-    const scale = 0.24 + distance * 0.82;
+    const scale = enemyApproachScale(distance);
     const size = Math.min(width, height) * (enemy.isBoss ? 0.25 : 0.17) * scale;
     const x = width / 2;
-    const y = height * (0.34 + distance * 0.08) + Math.sin(seconds * 2.5) * size * 0.04;
+    const y = enemyCenterY(height, distance) + Math.sin(seconds * 2.5) * size * 0.04;
     const sprite = enemy.isBoss ? enemySprites.boss : enemySprites.beast;
     const spriteHeight = size * (enemy.isBoss ? 2.6 : 3);
     ctx.save();
@@ -585,7 +593,7 @@ class GameView {
   private drawProjectiles(ctx: CanvasRenderingContext2D, width: number, height: number): void {
     const enemy = this.session.enemy;
     const distance = enemy.distance;
-    const size = Math.min(width, height) * (enemy.isBoss ? 0.25 : 0.17) * (0.24 + distance * 0.82);
+    const size = Math.min(width, height) * (enemy.isBoss ? 0.25 : 0.17) * enemyApproachScale(distance);
     const origin: Point = { x: width / 2, y: height * 0.82 };
     for (const projectile of this.projectiles) {
       const eased = 1 - (1 - projectile.progress) ** 3;
@@ -603,7 +611,7 @@ class GameView {
     }
     if (enemy.hitFlash > 0) {
       ctx.save(); ctx.globalAlpha = enemy.hitFlash * 0.45; ctx.strokeStyle = '#dffffc'; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(width / 2, height * (0.34 + distance * 0.08), size * (0.9 + enemy.hitFlash * 0.35), 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+      ctx.beginPath(); ctx.arc(width / 2, enemyCenterY(height, distance), size * (0.9 + enemy.hitFlash * 0.35), 0, Math.PI * 2); ctx.stroke(); ctx.restore();
     }
   }
 
@@ -636,12 +644,12 @@ class GameView {
     const width = this.canvas?.clientWidth ?? 0;
     const height = this.canvas?.clientHeight ?? 0;
     const enemy = this.session.enemy;
-    return Math.min(width, height) * (enemy.isBoss ? 0.25 : 0.17) * (0.24 + enemy.distance * 0.82);
+    return Math.min(width, height) * (enemy.isBoss ? 0.25 : 0.17) * enemyApproachScale(enemy.distance);
   }
 
   private enemyEffectPoint(): Point {
     const height = this.canvas?.clientHeight ?? 0;
-    return { x: (this.canvas?.clientWidth ?? 0) / 2, y: height * (0.34 + this.session.enemy.distance * 0.08) };
+    return { x: (this.canvas?.clientWidth ?? 0) / 2, y: enemyCenterY(height, this.session.enemy.distance) };
   }
 
   private burstAtEnemy(count: number, hue: number, center: Point, size: number): void {
