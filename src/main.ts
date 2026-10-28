@@ -141,6 +141,7 @@ class GameView {
   private slashes: Slash[] = [];
   private shake = 0;
   private impactFlash = 0;
+  private damageFlash = 0;
   private feedback = '';
   private feedbackTimer = 0;
   private previousStage = 1;
@@ -206,11 +207,17 @@ class GameView {
   private loop(time: number): void {
     const delta = (time - this.lastTime) / 1000;
     this.lastTime = time;
+    const hpBeforeTick = this.session.hp;
     if (!this.session.ended) this.session.tick(delta);
+    if (this.session.hp < hpBeforeTick) this.onDamageTaken();
     this.updateEffects(delta);
     this.draw(time / 1000);
     this.updateHud();
     if (this.session.ended) {
+      if (!this.session.cleared && this.damageFlash > 0.08) {
+        this.animation = requestAnimationFrame((nextTime) => this.loop(nextTime));
+        return;
+      }
       this.showResult();
       return;
     }
@@ -264,6 +271,14 @@ class GameView {
     if (button) button.textContent = this.session.paused ? '再開' : '一時停止';
   }
 
+  private onDamageTaken(): void {
+    this.damageFlash = 1;
+    this.shake = Math.max(this.shake, 0.52);
+    this.feedback = 'DAMAGE';
+    this.feedbackTimer = 0.72;
+    sound.blip('damage');
+  }
+
   private returnToTitle(): void {
     cancelAnimationFrame(this.animation);
     window.removeEventListener('keydown', this.onKeyDown);
@@ -275,6 +290,7 @@ class GameView {
     this.feedbackTimer = Math.max(0, this.feedbackTimer - delta);
     this.shake = Math.max(0, this.shake - delta * 0.9);
     this.impactFlash = Math.max(0, this.impactFlash - delta * 1.7);
+    this.damageFlash = Math.max(0, this.damageFlash - delta * 2.4);
     this.projectiles = this.projectiles.map((projectile) => ({ ...projectile, progress: projectile.progress + delta * 2.8 })).filter((projectile) => projectile.progress < 1);
     this.particles = this.particles.map((particle) => ({
       ...particle,
@@ -302,7 +318,25 @@ class GameView {
       ctx.fillStyle = `rgba(220, 255, 248, ${this.impactFlash * 0.28})`;
       ctx.fillRect(0, 0, width, height);
     }
+    this.drawDangerVignette(ctx, width, height, seconds);
     ctx.restore();
+  }
+
+  private drawDangerVignette(ctx: CanvasRenderingContext2D, width: number, height: number, seconds: number): void {
+    const urgency = Math.max(0, Math.min(1, (this.session.enemy.distance - 0.58) / 0.42));
+    if (urgency <= 0 && this.damageFlash <= 0) return;
+
+    const pulse = 0.68 + Math.sin(seconds * (5 + urgency * 8)) * 0.32;
+    if (this.damageFlash > 0) {
+      ctx.fillStyle = `rgba(120, 0, 12, ${this.damageFlash * 0.16})`;
+      ctx.fillRect(0, 0, width, height);
+    }
+    const vignette = ctx.createRadialGradient(width / 2, height / 2, Math.min(width, height) * 0.18, width / 2, height / 2, Math.hypot(width, height) * 0.68);
+    vignette.addColorStop(0, 'rgba(70, 0, 8, 0)');
+    vignette.addColorStop(0.58, `rgba(135, 8, 18, ${this.damageFlash * 0.1})`);
+    vignette.addColorStop(1, `rgba(255, 28, 24, ${Math.min(0.72, urgency * (0.12 + pulse * 0.2) + this.damageFlash * 0.48)})`);
+    ctx.fillStyle = vignette;
+    ctx.fillRect(0, 0, width, height);
   }
 
   private drawBackground(ctx: CanvasRenderingContext2D, width: number, height: number, seconds: number): void {
@@ -641,7 +675,11 @@ class GameView {
     const fill = document.querySelector<HTMLElement>('#stage-track-fill');
     if (fill) fill.style.width = `${Math.min(100, Math.max(0, this.session.stageProgress * 100))}%`;
     const health = document.querySelector<HTMLDivElement>('#health');
-    if (health) health.innerHTML = Array.from({ length: 5 }, (_, index) => `<span class="health-pip ${index < this.session.hp ? 'alive' : ''}"></span>`).join('');
+    if (health) {
+      health.innerHTML = Array.from({ length: 5 }, (_, index) => `<span class="health-pip ${index < this.session.hp ? 'alive' : ''}"></span>`).join('');
+      health.classList.toggle('damaged', this.damageFlash > 0.25);
+    }
+    document.querySelector('.arena-frame')?.classList.toggle('danger', enemy.distance > 0.62);
     document.querySelector('#arena-message')?.classList.toggle('visible', this.feedbackTimer > 0);
     if (this.previousStage !== this.session.stage) {
       this.previousStage = this.session.stage;
