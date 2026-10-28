@@ -67,6 +67,30 @@ function titleScreen(): void {
   app.innerHTML = `
     <main class="title-screen">
       <div class="title-stars" aria-hidden="true"></div>
+      <svg class="title-castle" viewBox="0 0 1440 820" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <radialGradient id="title-ember-moon">
+            <stop offset="0" stop-color="#d85c43" stop-opacity=".62" />
+            <stop offset=".42" stop-color="#8e2934" stop-opacity=".26" />
+            <stop offset="1" stop-color="#53172a" stop-opacity="0" />
+          </radialGradient>
+          <linearGradient id="title-castle-stone" x1="0" x2="1" y1="0" y2="0">
+            <stop stop-color="#0b080e" />
+            <stop offset=".5" stop-color="#21131b" />
+            <stop offset="1" stop-color="#0a070d" />
+          </linearGradient>
+        </defs>
+        <circle cx="720" cy="335" r="310" fill="url(#title-ember-moon)" />
+        <path d="M0 820V468h66V355h35v-62l49 55 48-55v64h38v126h82v-54h46v54h26v-91h55v91h550v-91h55v91h26v-54h46v54h82V357h38v-64h35v62l49-55 48 55v113h66v352Z" fill="#0b080e" />
+        <path d="M437 820V476c0-130 126-232 283-232s283 102 283 232v344" fill="#0a070d" stroke="#60313a" stroke-width="5" />
+        <path d="M477 820V485c0-109 108-196 243-196s243 87 243 196v335" fill="none" stroke="#341a25" stroke-width="3" />
+        <path d="M405 820V474c0-145 140-258 315-258s315 113 315 258v346" fill="none" stroke="#351b25" stroke-width="2" />
+        <g fill="#d85b3a" opacity=".55">
+          <path d="M159 403h13v66h-13zM213 403h13v66h-13zM1214 403h13v66h-13zM1268 403h13v66h-13z" />
+          <path d="M338 538l17-31 17 31-17 20zM1068 538l17-31 17 31-17 20z" />
+        </g>
+        <path d="M0 716h1440v104H0z" fill="url(#title-castle-stone)" opacity=".64" />
+      </svg>
       <section class="title-copy">
         <p class="eyebrow">KEYBOARD ACTION / 01</p>
         <h1>TYPE<span>BREAKERS</span></h1>
