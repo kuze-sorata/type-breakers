@@ -12,7 +12,9 @@ type Particle = { x: number; y: number; vx: number; vy: number; life: number; ma
 type Slash = { life: number; maxLife: number; angle: number; size: number; hue: number; x: number; y: number };
 
 function enemyApproachScale(distance: number): number {
-  return (0.24 + distance * 0.82) * (1 + distance ** 3 * 2);
+  // Keep the close-up dramatic without letting the sprite jump several times
+  // larger than the arena before the impact animation can take over.
+  return Math.min(1.65, (0.24 + distance * 0.82) * (1 + distance ** 3 * 2));
 }
 
 function enemyCenterY(height: number, distance: number): number {
@@ -315,7 +317,11 @@ class GameView {
     const height = this.canvas.clientHeight;
     const ctx = this.context;
     ctx.save();
-    ctx.clearRect(0, 0, width, height);
+    // Clear in backing-store pixels so a previous close-up cannot survive a
+    // resize or a high-DPI transform as a strip below the current enemy.
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    ctx.setTransform(this.canvas.width / width, 0, 0, this.canvas.height / height, 0, 0);
     if (this.shake > 0) ctx.translate((Math.random() - 0.5) * this.shake * 26, (Math.random() - 0.5) * this.shake * 18);
     this.drawBackground(ctx, width, height, seconds);
     this.drawProjectiles(ctx, width, height);
@@ -564,7 +570,7 @@ class GameView {
     const x = width / 2;
     const y = enemyCenterY(height, distance) + Math.sin(seconds * 2.5) * size * 0.04;
     const sprite = enemy.isBoss ? enemySprites.boss : enemySprites.beast;
-    const spriteHeight = size * (enemy.isBoss ? 2.6 : 3);
+    const spriteHeight = Math.min(size * (enemy.isBoss ? 2.6 : 3), height * 0.88);
     ctx.save();
     ctx.globalAlpha = 0.25 + distance * 0.2;
     ctx.fillStyle = '#050812';
